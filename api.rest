@@ -1,1 +1,13 @@
+
+// Get all dogs 
 http://localhost:5000/api/v1/dogs
+
+###
+
+// Get a dog by id 
+ http://localhost:5000/api/v1/dogs/1
+
+### POST A DOG 
+POST http://localhost:5000/api/v1/dogs 
+
+{"name": "Brad", "age": "2", "breed": "Labrador", "price": 700 },
