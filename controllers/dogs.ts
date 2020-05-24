@@ -27,18 +27,22 @@ const getDogs = async ({ response }: { response: any }) => {
 const getDog = async ({
   request,
   response,
+  params,
 }: {
   request: any;
   response: any;
+  params: any;
 }) => {
   //wrapping in try catch to check the error in db
   try {
-    //Get the id from the params(request.params.id wasn't working)
-    let id = request.body;
+    //Get the id from the params
+    let id = params.id;
+
     // Search the database for the dog with the matching id
-    const data: any = await Dog.findOne(id);
+    const data: any = await Dog.findOne({ _id: { $oid: id } });
     //Response if the dog is found
     if (data) {
+      console.log(data);
       response.body = {
         success: true,
         data,
@@ -98,7 +102,56 @@ const addDog = async ({
 
 //update a dog's Details
 // Put api/v1/dogs/:id
-const updateDog = ({ response }: { response: any }) => {};
+const updateDog = async ({
+  request,
+  response,
+  params,
+}: {
+  request: any;
+  response: any;
+  params: any;
+}) => {
+  //wrapping in try catch to check the error in db
+  try {
+    //get the id from param
+    const id: string = params.id;
+    //get the body from requested id
+    let body: any = await request.body();
+
+    //create the data object wit the new updated values
+    let data: {
+      name?: string;
+      age?: string;
+      breed?: string;
+      price?: number;
+    } = {};
+    if (body.value.name) {
+      // if an updated name is sent
+      data["name"] = body.value.name;
+    }
+    if (body.value.age) {
+      // if an updated age  is sent
+      data["age"] = body.value.age;
+    }
+    if (body.value.breed) {
+      // if an updated breed is sent
+      data["breed"] = body.value.breed;
+    }
+    if (body.value.price) {
+      // if an updated price is sent
+      data["price"] = body.value.price;
+    }
+    // Updating the database
+    const result = await Dog.updateOne({ _id: { $oid: id } }, { $set: data });
+    // sending the response
+    response.body = { success: true, result };
+    response.status = 200;
+  } catch (err) {
+    response.body = { message: "Check your console" };
+    response.status = 500;
+    console.log(err);
+  }
+};
 
 //Delete a Dog
 // Delete api/v1/dogs/:id
