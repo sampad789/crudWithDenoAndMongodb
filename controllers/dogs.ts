@@ -14,18 +14,55 @@ let dogs: IDog[] = [
 ///api/v1/dogs
 
 const getDogs = async ({ response }: { response: any }) => {
-  const allDo = await Dog.find();
+  const allDogs = await Dog.find();
   response.body = {
     success: true,
-    data: allDo,
+    data: allDogs,
   };
 };
 
 //Get single DOG
 ///api/v1/dogs/:id
 
-const getDog = ({ response }: { response: any }) => {
-  response.body = "Success";
+const getDog = async ({
+  request,
+  response,
+}: {
+  request: any;
+  response: any;
+}) => {
+  //wrapping in try catch to check the error in db
+  try {
+    //Get the id from the params(request.params.id wasn't working)
+    let id = request.body;
+    // Search the database for the dog with the matching id
+    const data: any = await Dog.findOne(id);
+    //Response if the dog is found
+    if (data) {
+      response.body = {
+        success: true,
+        data,
+      };
+      response.status = 200;
+    }
+    // Response if the dog doesn't exist with the given id
+    else {
+      const notFound = "DOG NOT FOUND";
+      response.body = {
+        success: true,
+        notFound,
+      };
+      response.status = 204;
+    }
+  } catch (err) {
+    // catch the error if there's some error connecting or retrrieving data from db
+    response.body = {
+      success: false,
+      message: "Check your console",
+    };
+    response.status = 500;
+    console.log(err);
+  }
 };
 
 //Add a new Dog
@@ -53,7 +90,7 @@ const addDog = async ({
     };
     response.status = 201;
   } catch (e) {
-    response.body = null;
+    response.body = { message: "Check your console" };
     response.status = 500;
     console.log(e);
   }
